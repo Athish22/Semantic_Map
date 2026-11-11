@@ -1,0 +1,28 @@
+# Physiological: asthma / pollen allergy, gets tired quickly.
+# Uses the time-dependent data: run with --time to change the weather and pollen.
+id: Ines
+label: Asthmatic, pollen-allergic
+category: physiological
+requirements:
+  - label: Low pollen
+    importance: 0.9
+    flexibility: 0.3
+    condition: {property: P_pollen_intensity, op: LESSER_THAN, value: 0.2}
+
+  - label: Sheltered when it rains
+    importance: 0.7
+    flexibility: 0.3
+    condition:               # indoors, OR it is not raining right now
+      OR:
+        - {property: D_INDOOR, op: EQUALS, value: true}
+        - NOT: {property: P_weather_condition, op: EQUALS, value: [rain, thunderstorm]}
+
+  - label: Comfortable temperature
+    importance: 0.3
+    flexibility: 0.8
+    condition: {property: P_temperature, op: EQUALS, value: 22}
+
+  - label: A bench to rest on the way
+    importance: 0.5
+    flexibility: 0.5
+    condition: {property: P_Amenity, op: EQUALS, value: bench}

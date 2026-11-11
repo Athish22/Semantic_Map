@@ -1,0 +1,41 @@
+@prefix : <http://piirrite.univ-lyon1.fr/data#> .
+@prefix pcv: <http://piirrite.univ-lyon1.fr/vocabulary#> .
+@prefix piirrite: <http://piirrite.univ-lyon1.fr/ontology/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Tom a piirrite:UserProfile ;
+    rdfs:label "Anxious walker in the evening" ;
+    piirrite:hasRequirement [ rdfs:label "Avoid private / restricted passages" ;
+            piirrite:hasCondition [ a piirrite:ComposedCondition ;
+                    piirrite:hasOperand [ a piirrite:AtomicCondition ;
+                            piirrite:hasRequiredValue "badge"^^xsd:string,
+                                "permit"^^xsd:string,
+                                "private"^^xsd:string ;
+                            piirrite:hasTargetProperty pcv:P_Access ;
+                            piirrite:usesOperator piirrite:EQUALS ] ;
+                    piirrite:usesOperator piirrite:NOT ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.3 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.6 ] ],
+        [ rdfs:label "Away from tram traffic" ;
+            piirrite:hasCondition [ a piirrite:ComposedCondition ;
+                    piirrite:hasOperand [ a piirrite:AtomicCondition ;
+                            piirrite:hasDistanceFactor [ a piirrite:DistanceFactor ;
+                                    piirrite:distanceType "From bird's flight" ;
+                                    piirrite:hasRequiredValue 50.0 ;
+                                    piirrite:usesOperator piirrite:LESSER_THAN ] ;
+                            piirrite:hasRequiredValue "yes"^^xsd:string ;
+                            piirrite:hasTargetProperty pcv:D_TRAM ;
+                            piirrite:usesOperator piirrite:EQUALS ] ;
+                    piirrite:usesOperator piirrite:NOT ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.5 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.5 ] ],
+        [ rdfs:label "Lit paths only, if at all possible" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue "yes"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Lit ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.15 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.95 ] ] ;
+    rdfs:comment "cognitive" .
+

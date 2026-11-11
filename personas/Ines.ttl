@@ -1,0 +1,47 @@
+@prefix : <http://piirrite.univ-lyon1.fr/data#> .
+@prefix pcv: <http://piirrite.univ-lyon1.fr/vocabulary#> .
+@prefix piirrite: <http://piirrite.univ-lyon1.fr/ontology/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Ines a piirrite:UserProfile ;
+    rdfs:label "Asthmatic, pollen-allergic" ;
+    piirrite:hasRequirement [ rdfs:label "Low pollen" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue 0.2 ;
+                    piirrite:hasTargetProperty pcv:P_pollen_intensity ;
+                    piirrite:usesOperator piirrite:LESSER_THAN ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.3 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.9 ] ],
+        [ rdfs:label "Comfortable temperature" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue 22 ;
+                    piirrite:hasTargetProperty pcv:P_temperature ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.8 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.3 ] ],
+        [ rdfs:label "Sheltered when it rains" ;
+            piirrite:hasCondition [ a piirrite:ComposedCondition ;
+                    piirrite:hasOperand [ a piirrite:AtomicCondition ;
+                            piirrite:hasRequiredValue true ;
+                            piirrite:hasTargetProperty pcv:D_INDOOR ;
+                            piirrite:usesOperator piirrite:EQUALS ],
+                        [ a piirrite:ComposedCondition ;
+                            piirrite:hasOperand [ a piirrite:AtomicCondition ;
+                                    piirrite:hasRequiredValue "rain"^^xsd:string,
+                                        "thunderstorm"^^xsd:string ;
+                                    piirrite:hasTargetProperty pcv:P_weather_condition ;
+                                    piirrite:usesOperator piirrite:EQUALS ] ;
+                            piirrite:usesOperator piirrite:NOT ] ;
+                    piirrite:usesOperator piirrite:OR ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.3 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.7 ] ],
+        [ rdfs:label "A bench to rest on the way" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue "bench"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Amenity ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.5 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.5 ] ] ;
+    rdfs:comment "physiological" .
+

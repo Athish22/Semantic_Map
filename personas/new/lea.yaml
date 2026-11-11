@@ -1,0 +1,29 @@
+# Mobility: manual wheelchair user.
+id: Lea
+label: Manual wheelchair user
+category: mobility
+requirements:
+  - label: No stairs
+    importance: INF          # must-have -> stair edges are removed from the graph
+    flexibility: 0.0
+    condition: {property: D_STAIRS, op: EQUALS, value: false}
+
+  - label: Wheelchair-accessible paths
+    importance: 0.9
+    flexibility: 0.3         # 'limited' is tolerated with a penalty, 'no' is not
+    condition: {property: P_Wheelchair, op: EQUALS, value: "yes"}   # ordinal: yes or designated
+
+  - label: Smooth surface
+    importance: 0.7
+    flexibility: 0.4
+    condition: {property: P_Smoothness, op: EQUALS, value: good}    # ordinal: good or better
+
+  - label: Gentle slopes
+    importance: 0.8
+    flexibility: 0.2
+    condition: {property: D_SLOPE, op: LESSER_THAN, value: 6}       # percent
+
+  - label: Pass by toilets
+    importance: 0.5
+    flexibility: 0.5         # soft waypoint: only if the detour is reasonable
+    condition: {property: P_Amenity, op: EQUALS, value: toilets}

@@ -1,0 +1,45 @@
+@prefix : <http://piirrite.univ-lyon1.fr/data#> .
+@prefix pcv: <http://piirrite.univ-lyon1.fr/vocabulary#> .
+@prefix piirrite: <http://piirrite.univ-lyon1.fr/ontology/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Lea a piirrite:UserProfile ;
+    rdfs:label "Manual wheelchair user" ;
+    piirrite:hasRequirement [ rdfs:label "Smooth surface" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue "good"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Smoothness ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.4 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.7 ] ],
+        [ rdfs:label "Gentle slopes" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue 6 ;
+                    piirrite:hasTargetProperty pcv:D_SLOPE ;
+                    piirrite:usesOperator piirrite:LESSER_THAN ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.2 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.8 ] ],
+        [ rdfs:label "Wheelchair-accessible paths" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue "yes"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Wheelchair ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.3 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.9 ] ],
+        [ rdfs:label "Pass by toilets" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue "toilets"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Amenity ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.5 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.5 ] ],
+        [ rdfs:label "No stairs" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue false ;
+                    piirrite:hasTargetProperty pcv:D_STAIRS ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.0 ] ;
+            piirrite:hasImportance [ piirrite:hasValue "INF"^^xsd:double ] ] ;
+    rdfs:comment "mobility" .
+

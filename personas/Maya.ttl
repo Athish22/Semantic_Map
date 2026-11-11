@@ -1,0 +1,36 @@
+@prefix : <http://piirrite.univ-lyon1.fr/data#> .
+@prefix pcv: <http://piirrite.univ-lyon1.fr/vocabulary#> .
+@prefix piirrite: <http://piirrite.univ-lyon1.fr/ontology/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Maya a piirrite:UserProfile ;
+    rdfs:label "Runner, likes green routes" ;
+    piirrite:hasRequirement [ rdfs:label "Decent surface" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue "intermediate"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Smoothness ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.7 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.3 ] ],
+        [ rdfs:label "Close to trees" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasDistanceFactor [ a piirrite:DistanceFactor ;
+                            piirrite:distanceType "From bird's flight" ;
+                            piirrite:hasRequiredValue 15.0 ;
+                            piirrite:usesOperator piirrite:LESSER_THAN ] ;
+                    piirrite:hasRequiredValue "tree"^^xsd:string,
+                        "tree_row"^^xsd:string ;
+                    piirrite:hasTargetProperty pcv:P_Natural ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.5 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.7 ] ],
+        [ rdfs:label "Outdoors" ;
+            piirrite:hasCondition [ a piirrite:AtomicCondition ;
+                    piirrite:hasRequiredValue false ;
+                    piirrite:hasTargetProperty pcv:D_INDOOR ;
+                    piirrite:usesOperator piirrite:EQUALS ] ;
+            piirrite:hasFlexibility [ piirrite:hasValue 0.5 ] ;
+            piirrite:hasImportance [ piirrite:hasValue 0.6 ] ] ;
+    rdfs:comment "preference" .
+

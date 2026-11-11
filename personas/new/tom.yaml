@@ -1,0 +1,25 @@
+# Cognitive: anxiety when walking alone in the evening; wants calm, visible routes.
+id: Tom
+label: Anxious walker in the evening
+category: cognitive
+requirements:
+  - label: Lit paths only, if at all possible
+    importance: 0.95
+    flexibility: 0.15
+    condition: {property: P_Lit, op: EQUALS, value: "yes"}
+
+  - label: Avoid private / restricted passages
+    importance: 0.6
+    flexibility: 0.3
+    condition:
+      NOT: {property: P_Access, op: EQUALS, value: [private, permit, badge]}
+
+  - label: Away from tram traffic
+    importance: 0.5
+    flexibility: 0.5
+    condition:
+      NOT:
+        property: D_TRAM
+        op: EQUALS
+        value: "yes"
+        distance: {op: LESSER_THAN, metres: 50}

@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PIIRRITE Routing</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root {
+  --bg: #f7f5f0; --panel: #fffdf9; --ink: #1f1d1a; --muted: #6f6a62; --line: #e4dfd5; --soft: #f0ece4;
+  --accent: #2f6fdf; --ok: #3b8a52; --bad: #d0453a; --unk: #c9c3b8; --warn: #b7791f;
+  --building: #ddd6ca; --green: #cfe5c3; --path: #b9b2a6;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; display: flex; }
+button, input, select, textarea { font: inherit; color: inherit; }
+#side { width: 420px; flex: none; display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); height: 100%; }
+#map { flex: 1; height: 100%; background: var(--bg); }
+header { padding: 14px 18px 0; border-bottom: 1px solid var(--line); }
+h1 { font-size: 16px; margin: 0; letter-spacing: .01em; }
+h1 small { font-weight: 400; color: var(--muted); }
+nav { display: flex; gap: 2px; margin-top: 10px; }
+nav button { border: 0; background: none; padding: 8px 12px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; }
+nav button.on { color: var(--ink); border-color: var(--ink); font-weight: 600; }
+.view { overflow-y: auto; flex: 1; padding: 14px 18px 40px; display: none; }
+.view.on { display: block; }
+h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 8px; font-weight: 600; }
+h2:first-child { margin-top: 0; }
+.row { display: flex; align-items: center; gap: 8px; }
+.pt { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; cursor: pointer; }
+.pt.picking { border-color: var(--accent); box-shadow: 0 0 0 2px #2f6fdf22; }
+.pin { width: 22px; height: 22px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+.pt code { font-family: var(--mono); font-size: 12px; color: var(--muted); flex: 1; }
+.hint { color: var(--muted); font-size: 12px; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 5px 10px; cursor: pointer; }
+.btn:hover { background: var(--soft); }
+.btn.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 600; padding: 9px 14px; width: 100%; }
+.btn.primary:disabled { opacity: .5; cursor: progress; }
+.btn.danger { color: var(--bad); }
+.btn.small { padding: 2px 8px; font-size: 12px; }
+.link { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 12px; }
+label.ctl { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; margin-bottom: 8px; font-size: 13px; }
+label.ctl input[type=range] { grid-column: 1 / -1; width: 100%; }
+label.ctl output { font-family: var(--mono); font-size: 12px; }
+input[type=datetime-local], input[type=search], input[type=number], select { border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; background: var(--panel); }
+details summary { cursor: pointer; color: var(--muted); font-size: 13px; margin: 6px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px 3px 6px; cursor: pointer; user-select: none; background: var(--panel); }
+.chip .dot { width: 12px; height: 12px; border-radius: 50%; }
+.chip.off { opacity: .45; }
+.chip.off .dot { background: transparent !important; border: 2px solid var(--unk); }
+.card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; background: var(--panel); transition: box-shadow .15s; }
+.card.focus { box-shadow: 0 0 0 2px var(--c, var(--accent)); }
+.card .top { display: flex; align-items: baseline; gap: 8px; cursor: pointer; }
+.card .name { font-weight: 650; }
+.card .sub { color: var(--muted); font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .len { font-variant-numeric: tabular-nums; font-weight: 600; }
+.delta { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--soft); color: var(--muted); font-variant-numeric: tabular-nums; }
+.swatch { width: 14px; height: 4px; border-radius: 2px; flex: none; align-self: center; }
+.req { margin-top: 8px; font-size: 12.5px; }
+.req .rl { display: flex; gap: 6px; align-items: baseline; }
+.req .rl span:first-child { flex: 1; }
+.tag { font-size: 10.5px; padding: 0 5px; border-radius: 4px; background: var(--soft); color: var(--muted); white-space: nowrap; }
+.tag.hard { background: #1f1d1a; color: #fffdf9; }
+.tag.wp { background: #e3ecfb; color: #1d4fa8; }
+.tag.ign { background: #f6ead7; color: #8a5a13; }
+.bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--soft); margin: 3px 0 1px; }
+.bar i { display: block; height: 100%; }
+.bar .ok { background: var(--ok); } .bar .bad { background: var(--bad); } .bar .unk { background: var(--unk); }
+.cmp { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.better { color: var(--ok); font-weight: 600; } .worse { color: var(--bad); font-weight: 600; }
+.note { color: var(--warn); font-size: 12px; margin-top: 6px; }
+.err { color: var(--bad); font-size: 12.5px; }
+.via { font-size: 12px; margin-top: 6px; }
+.legend { display: flex; gap: 12px; font-size: 11.5px; color: var(--muted); margin: 4px 0 10px; flex-wrap: wrap; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 6px; border-radius: 2px; margin-right: 4px; background: var(--c); }
+.status { font-size: 12.5px; color: var(--muted); margin: 8px 0; min-height: 18px; }
+.prow { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.prow b { font-family: var(--mono); font-size: 12.5px; cursor: pointer; }
+.prow .vals { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.prow .vals span { font-size: 11px; background: var(--soft); border-radius: 4px; padding: 0 5px; font-family: var(--mono); }
+textarea { width: 100%; min-height: 380px; font-family: var(--mono); font-size: 12.5px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #fbfaf6; resize: vertical; tab-size: 2; }
+.msgs div { font-size: 12.5px; margin: 3px 0; }
+pre.help { font-family: var(--mono); font-size: 11.5px; background: var(--soft); padding: 8px; border-radius: 6px; overflow-x: auto; }
+.leaflet-container { background: var(--bg); font: inherit; }
+.mapctl { background: var(--panel); padding: 6px 8px; border-radius: 8px; box-shadow: 0 1px 4px #0002; font-size: 12px; }
+.mapctl label { display: block; cursor: pointer; }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 8px 14px; border-radius: 8px; font-size: 13px; z-index: 2000; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.on { opacity: 1; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { flex: 1; border: 0; background: var(--panel); padding: 6px 4px; cursor: pointer; font-size: 13px; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--ink); color: var(--panel); font-weight: 600; }
+.georesults { position: absolute; left: 0; right: 0; top: 100%; z-index: 1500; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 18px #0002; margin-top: 4px; max-height: 280px; overflow-y: auto; }
+.georesults .gr { display: flex; gap: 6px; align-items: center; padding: 7px 10px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+.georesults .gr:last-child { border-bottom: 0; }
+.georesults .gr span { flex: 1; cursor: pointer; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.georesults .gr span:hover { color: var(--accent); }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); z-index: 3000; color: var(--muted); }
+@media (max-width: 760px) {
+  body { flex-direction: column; }
+  #side { width: 100%; height: 55%; order: 2; border-right: 0; border-top: 1px solid var(--line); }
+  #map { height: 45%; flex: none; }
+  .view { padding: 12px 16px 30px; }
+  header { padding: 10px 16px 0; }
+}
+</style>
+</head>
+<body>
+<div id="loading">Loading campus network…</div>
+<aside id="side">
+  <header>
+    <h1>PIIRRITE routing <small>· La Doua campus</small></h1>
+    <nav>
+      <button data-view="route" class="on">Route</button>
+      <button data-view="personas">Personas</button>
+      <button data-view="props">Properties</button>
+    </nav>
+  </header>
+
+  <section class="view on" id="v-route">
+    <h2>Trip</h2>
+    <div style="position:relative;margin-bottom:8px">
+      <input type="search" id="geo" placeholder="Search a place (address, landmark, city)…" style="width:100%">
+      <div id="geoRes" class="georesults" hidden></div>
+    </div>
+    <div class="pt" data-pt="A"><span class="pin" style="background:#1f1d1a">A</span><code id="ptA">–</code><button class="link">pick</button></div>
+    <div class="pt" data-pt="B"><span class="pin" style="background:#d0453a">B</span><code id="ptB">–</code><button class="link">pick</button></div>
+    <div class="row" style="justify-content:space-between">
+      <span class="hint">Click <b>pick</b>, then the map. Markers are draggable.</span>
+      <button class="btn small" id="swap">⇅ swap</button>
+    </div>
+    <div class="note" id="snapwarn"></div>
+
+    <h2>Path network</h2>
+    <div class="seg" id="mode">
+      <button data-mode="auto">Auto</button><button data-mode="campus">Campus graph</button><button data-mode="osm">OpenStreetMap</button>
+    </div>
+    <div class="hint" id="modeHint" style="margin-top:4px"></div>
+    <div class="hint" id="netinfo" style="margin-top:4px"></div>
+
+    <h2>Conditions</h2>
+    <label class="row" style="margin-bottom:6px"><input type="checkbox" id="useTime"> Weather &amp; pollen at</label>
+    <input type="datetime-local" id="time" disabled style="width:100%">
+    <details>
+      <summary>Tuning</summary>
+      <label class="ctl">λ: inadequacy weight vs length <output id="lamV"></output><input type="range" id="lam" min="0" max="10" step="0.5"></label>
+      <label class="ctl">Penalty where data is missing <output id="unkV"></output><input type="range" id="unk" min="0" max="1" step="0.05"></label>
+    </details>
+
+    <h2 class="row" style="justify-content:space-between">Personas <span><button class="link" id="selAll">all</button> · <button class="link" id="selNone">none</button></span></h2>
+    <div class="chips" id="chips"></div>
+
+    <div style="margin-top:16px"><button class="btn primary" id="go">Find routes</button></div>
+    <div class="status" id="status"></div>
+    <div id="results"></div>
+  </section>
+
+  <section class="view" id="v-personas">
+    <div id="plist">
+      <div class="row" style="gap:6px;margin-bottom:12px">
+        <button class="btn" id="newP">+ New persona</button>
+        <select id="tpl"><option value="">blank</option></select>
+      </div>
+      <div id="pcards"></div>
+    </div>
+    <div id="editor" hidden>
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <b id="edTitle">New persona</b>
+        <button class="link" id="edCancel">← back</button>
+      </div>
+      <textarea id="yaml" spellcheck="false"></textarea>
+      <div class="row" style="margin:8px 0;gap:6px">
+        <button class="btn" id="edCheck">Validate</button>
+        <button class="btn" id="edSave" style="font-weight:600">Save</button>
+        <span class="hint" id="edHint"></span>
+      </div>
+      <div class="msgs" id="edMsgs"></div>
+      <details>
+        <summary>YAML format</summary>
+<pre class="help">id: Lea                      # letters, digits, _
+label: Manual wheelchair user
+category: mobility
+requirements:
+  - label: No stairs
+    importance: INF            # 0..1, or INF = must-have
+    flexibility: 0.0           # 0..1 tolerance
+    condition: {property: D_STAIRS, op: EQUALS, value: false}
+  - label: Away from tram tracks
+    importance: 0.7
+    flexibility: 0.4
+    condition:
+      NOT:                     # AND / OR (list), NOT (one)
+        property: D_TRAM
+        op: EQUALS             # EQUALS | LESSER_THAN | GREATER_THAN
+        value: "yes"
+        distance: {op: LESSER_THAN, metres: 30}</pre>
+        <div class="hint">Importance ≥ 0.9 with flexibility ≤ 0.1 is also treated as must-have. EQUALS on amenities (toilets, bins, benches…) becomes a "go via" stop. See the Properties tab for what has data.</div>
+      </details>
+    </div>
+  </section>
+
+  <section class="view" id="v-props">
+    <div class="row" style="margin-bottom:10px">
+      <input type="search" id="pq" placeholder="Filter, e.g. wheel, light, noise" style="flex:1">
+      <label class="row hint"><input type="checkbox" id="pwith" checked> with data</label>
+    </div>
+    <div class="hint" style="margin-bottom:6px">Click a name to copy it. Counts are entities in the knowledge graph carrying the property.</div>
+    <div id="plistProps"></div>
+  </section>
+</aside>
+<div id="map"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const PALETTE = ["#2f6fdf","#e8590c","#2b8a3e","#ae3ec9","#c92a2a","#0b7285","#5f3dc4","#e67700","#495057","#d6336c","#1971c2","#66a80f"];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = m => Math.round(m).toLocaleString("en") + " m";
+const store = { get(k, d) { try { const v = localStorage.getItem("piirrite." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+                set(k, v) { try { localStorage.setItem("piirrite." + k, JSON.stringify(v)); } catch {} } };
+
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} : { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200); }
+
+// ---------------------------------------------------------------- state
+const S = { meta: null, personas: [], selected: new Set(store.get("selected", [])), colors: {}, A: null, B: null,
+            picking: null, layers: {}, shortestLayer: null, results: {}, focus: null, props: null };
+
+// ---------------------------------------------------------------- map
+const map = L.map("map", { zoomControl: true, zoomSnap: 0.25, zoomDelta: 0.5, wheelPxPerZoomLevel: 90 });
+map.createPane("base").style.zIndex = 250;
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20, maxNativeZoom: 19, attribution: "© OpenStreetMap contributors" });
+let kgBase;
+const routeGroup = L.layerGroup().addTo(map);
+const pinIcon = (txt, bg) => L.divIcon({ className: "", iconSize: [26, 26], iconAnchor: [13, 13],
+  html: `<div class="pin" style="background:${bg};width:26px;height:26px;border:2px solid #fff;box-shadow:0 1px 4px #0005">${txt}</div>` });
+const markers = {
+  A: L.marker([0, 0], { draggable: true, icon: pinIcon("A", "#1f1d1a"), zIndexOffset: 1000 }),
+  B: L.marker([0, 0], { draggable: true, icon: pinIcon("B", "#d0453a"), zIndexOffset: 1000 }),
+};
+for (const k of ["A", "B"]) markers[k].on("dragend", e => setPoint(k, [e.target.getLatLng().lat, e.target.getLatLng().lng]));
+
+const BgCtl = L.Control.extend({ options: { position: "topright" }, onAdd() {
+  const d = L.DomUtil.create("div", "mapctl");
+  d.innerHTML = `<label><input type="radio" name="bg" value="kg" checked> Campus (knowledge graph)</label>
+                 <label><input type="radio" name="bg" value="osm"> OpenStreetMap tiles</label>
+                 <div class="legend" style="margin:6px 0 0"><span style="--c:#1f1d1a">ground floor</span><span style="--c:repeating-linear-gradient(90deg,#1f1d1a 0 3px,transparent 3px 5px)">other floor</span></div>`;
+  L.DomEvent.disableClickPropagation(d);
+  d.addEventListener("change", e => setBg(e.target.value));
+  return d;
+}});
+function setBg(v) {
+  if (v === "osm") { osm.addTo(map); map.removeLayer(kgBase); }
+  else { map.removeLayer(osm); kgBase.addTo(map); }
+  const r = document.querySelector(`.mapctl input[value=${v}]`); if (r) r.checked = true;
+  store.set("bg", v);
+}
+
+// ---------------------------------------------------------------- network mode + place search
+const MODE_HINT = {
+  auto: "Campus knowledge graph when A and B are on La Doua campus, OpenStreetMap anywhere else.",
+  campus: "PIIRRITE knowledge graph only (indoor floors, campus sensors). Points snap to the campus.",
+  osm: "OpenStreetMap paths around A and B (up to ~11 km apart), live weather and pollen from Open-Meteo.",
+};
+function setMode(m) {
+  S.mode = m; store.set("mode", m);
+  document.querySelectorAll("#mode button").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
+  $("#modeHint").textContent = MODE_HINT[m];
+  clearRoutes(true);
+}
+document.querySelectorAll("#mode button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+let geoTimer, geoSeq = 0;
+$("#geo").addEventListener("input", () => {
+  clearTimeout(geoTimer);
+  const q = $("#geo").value.trim();
+  if (q.length < 3) { $("#geoRes").hidden = true; return; }
+  geoTimer = setTimeout(async () => {
+    const seq = ++geoSeq;
+    let rows;
+    try { rows = await api("/api/geocode?q=" + encodeURIComponent(q)); } catch (e) { rows = []; toast(e.message); }
+    if (seq !== geoSeq) return;
+    $("#geoRes").innerHTML = rows.length ? rows.map((r, i) => `<div class="gr" data-i="${i}"><span title="${esc(r.name)}">${esc(r.name)}</span>
+        <button class="btn small" data-set="A">A</button><button class="btn small" data-set="B">B</button></div>`).join("")
+      : `<div class="gr hint">No match</div>`;
+    $("#geoRes").hidden = false;
+    $("#geoRes").querySelectorAll(".gr[data-i]").forEach(el => {
+      const r = rows[+el.dataset.i];
+      el.querySelector("span").onclick = () => { map.flyTo([r.lat, r.lon], 16); $("#geoRes").hidden = true; };
+      el.querySelectorAll("button").forEach(b => b.onclick = () => {
+        setPoint(b.dataset.set, [r.lat, r.lon]); $("#geoRes").hidden = true;
+        if (S.A && S.B) map.fitBounds(L.latLngBounds([S.A, S.B]), { padding: [80, 80], maxZoom: 17 });
+        else map.flyTo([r.lat, r.lon], 16);
+      });
+    });
+  }, 450);
+});
+$("#geo").addEventListener("keydown", e => { if (e.key === "Escape") $("#geoRes").hidden = true; });
+document.addEventListener("click", e => { if (!e.target.closest("#geo, #geoRes")) $("#geoRes").hidden = true; });
+
+map.on("click", e => {
+  const k = S.picking || (!S.A ? "A" : !S.B ? "B" : null);
+  if (!k) return;
+  setPoint(k, [e.latlng.lat, e.latlng.lng]);
+  setPicking(k === "A" && !S.B ? "B" : null);
+});
+
+function setPicking(k) {
+  S.picking = k;
+  document.querySelectorAll(".pt").forEach(el => el.classList.toggle("picking", el.dataset.pt === k));
+  map.getContainer().style.cursor = k ? "crosshair" : "";
+}
+function setPoint(k, ll) {
+  S[k] = ll;
+  markers[k].setLatLng(ll).addTo(map);
+  $("#pt" + k).textContent = ll[0].toFixed(5) + ", " + ll[1].toFixed(5);
+  store.set("pt" + k, ll);
+  clearRoutes(true);
+}
+document.querySelectorAll(".pt").forEach(el => el.addEventListener("click", () => setPicking(S.picking === el.dataset.pt ? null : el.dataset.pt)));
+$("#swap").onclick = () => { const a = S.A, b = S.B; if (a && b) { setPoint("A", b); setPoint("B", a); } };
+
+// ---------------------------------------------------------------- controls
+function bindRange(id, outId, key, def) {
+  const el = $(id), out = $(outId);
+  el.value = store.get(key, def); out.textContent = el.value;
+  el.oninput = () => { out.textContent = el.value; store.set(key, +el.value); };
+}
+$("#useTime").onchange = e => { $("#time").disabled = !e.target.checked; store.set("useTime", e.target.checked); };
+$("#time").onchange = e => store.set("time", e.target.value);
+
+function renderChips() {
+  $("#chips").innerHTML = S.personas.map(p => {
+    const why = p.label || p.category || p.source;
+    return `<span class="chip ${S.selected.has(p.id) ? "" : "off"}" data-id="${esc(p.id)}" title="${esc(why)}"><span class="dot" style="background:${S.colors[p.id]}"></span>${esc(p.id)}</span>`;
+  }).join("");
+  $("#chips").querySelectorAll(".chip").forEach(c => c.onclick = () => {
+    const id = c.dataset.id; S.selected.has(id) ? S.selected.delete(id) : S.selected.add(id);
+    store.set("selected", [...S.selected]); renderChips();
+  });
+}
+$("#selAll").onclick = () => { S.selected = new Set(S.personas.map(p => p.id)); store.set("selected", [...S.selected]); renderChips(); };
+$("#selNone").onclick = () => { S.selected.clear(); store.set("selected", []); renderChips(); };
+
+// ---------------------------------------------------------------- routing
+function drawSegments(segs, color, opts) {
+  const g = L.featureGroup();
+  for (const s of segs) {
+    const other = s.level !== 0;
+    L.polyline(s.coords, { color, weight: opts.weight, opacity: opts.opacity, dashArray: opts.dash || (other ? "4 6" : null), lineCap: "round", lineJoin: "round" })
+      .bindTooltip(opts.tip + (s.level === "v" ? " · stairs / level change" : other ? ` · floor ${s.level}` : ""), { sticky: true })
+      .addTo(g);
+  }
+  return g;
+}
+function clearRoutes(keepCards) {
+  routeGroup.clearLayers(); S.layers = {}; S.shortestLayer = null; S.results = {}; S.focus = null;
+  if (keepCards) { $("#results").innerHTML = ""; $("#status").textContent = ""; $("#snapwarn").textContent = ""; $("#netinfo").innerHTML = ""; }
+}
+function restyle() {
+  for (const [id, lay] of Object.entries(S.layers)) {
+    const on = !S.focus || S.focus === id;
+    lay.eachLayer(l => l.setStyle({ opacity: on ? .92 : .15, weight: S.focus === id ? 7 : 4.5 }));
+    if (S.focus === id) lay.bringToFront();
+  }
+  document.querySelectorAll(".card[data-id]").forEach(c => c.classList.toggle("focus", c.dataset.id === S.focus));
+}
+function setFocus(id, fit) {
+  S.focus = S.focus === id ? null : id; restyle();
+  if (fit && S.focus && S.layers[id]) map.fitBounds(S.layers[id].getBounds(), { padding: [40, 40] });
+}
+
+let runToken = 0;
+$("#go").onclick = async () => {
+  if (!S.A || !S.B) return toast("Place A and B on the map first");
+  const ids = S.personas.map(p => p.id).filter(id => S.selected.has(id));
+  if (!ids.length) return toast("Select at least one persona");
+  const token = ++runToken;
+  clearRoutes(true);
+  const body = { from: S.A, to: S.B, lam: +$("#lam").value, unknown_penalty: +$("#unk").value, mode: S.mode,
+                 time: $("#useTime").checked && $("#time").value ? $("#time").value : null };
+  $("#go").disabled = true;
+  try {
+    $("#status").textContent = S.mode === "campus" ? "Shortest path…"
+      : "Preparing the path network… (a new area is downloaded from OpenStreetMap, up to a minute)";
+    const sp = await api("/api/shortest", body);
+    if (token !== runToken) return;
+    if (sp.error) throw new Error(sp.error);
+    const net = sp.network;
+    if (net.kind === "osm") {
+      if (store.get("bg", "kg") === "kg") setBg("osm");
+      $("#netinfo").innerHTML = `Using <b>OpenStreetMap</b> · ${net.edges.toLocaleString("en")} path segments · weather &amp; pollen from Open-Meteo for ${esc(net.time.replace("T", " "))}`
+        + (net.notes || []).map(n => `<div class="note" style="margin-top:2px">${esc(n)}</div>`).join("");
+    } else {
+      $("#netinfo").innerHTML = `Using the <b>campus knowledge graph</b> · ${net.edges.toLocaleString("en")} path segments`;
+    }
+    if (Math.max(...sp.snap_m) > 60) $("#snapwarn").textContent = `Start/end snapped ${sp.snap_m[0]} m / ${sp.snap_m[1]} m to the nearest walkable path.`;
+    S.shortest = sp;
+    S.shortestLayer = drawSegments(sp.segments, "#1f1d1a", { weight: 8, opacity: .22, dash: "2 10", tip: `Shortest path · ${fmt(sp.length)}` }).addTo(routeGroup);
+    map.stop(); map.fitBounds(S.shortestLayer.getBounds(), { padding: [60, 60], animate: false });
+    $("#results").innerHTML = `<div class="card"><div class="top"><span class="swatch" style="background:repeating-linear-gradient(90deg,#1f1d1a8a 0 3px,transparent 3px 6px)"></span><span class="name">Shortest path</span><span class="sub">reference, ignores personas</span><span class="len">${fmt(sp.length)}</span></div></div>`
+      + `<div class="legend"><span style="--c:var(--ok)">requirement met</span><span style="--c:var(--bad)">unmet</span><span style="--c:var(--unk)">no data</span></div>`;
+    for (const [i, id] of ids.entries()) {
+      $("#status").textContent = `Routing ${id} (${i + 1}/${ids.length})…`;
+      let r;
+      try { r = await api("/api/route", { ...body, persona: id }); }
+      catch (e) { r = { persona: id, error: e.message }; }
+      if (token !== runToken) return;
+      S.results[id] = r;
+      if (!r.error) {
+        const lay = drawSegments(r.segments, S.colors[id], { weight: 4.5, opacity: .92, tip: `${id} · ${fmt(r.length)}` });
+        lay.on("click", () => setFocus(id, false));
+        lay.addTo(routeGroup); S.layers[id] = lay;
+      }
+      $("#results").insertAdjacentHTML("beforeend", resultCard(r));
+      const card = $(`#results .card[data-id="${CSS.escape(id)}"]`);
+      card.querySelector(".top").onclick = () => setFocus(id, true);
+      card.onmouseenter = () => { if (!S.focus) { S.focus = id; restyle(); S.focus = null; } };
+      card.onmouseleave = () => restyle();
+    }
+    $("#status").textContent = `${ids.length} persona${ids.length > 1 ? "s" : ""} routed${body.time ? " for " + body.time.replace("T", " ") : ""}. Click a card or route to focus it.`;
+    restyle();
+  } catch (e) {
+    $("#status").innerHTML = `<span class="err">${esc(e.message)}</span>`;
+  } finally { if (token === runToken) $("#go").disabled = false; }
+};
+
+function resultCard(r) {
+  const p = S.personas.find(x => x.id === r.persona) || {};
+  const head = `<div class="top"><span class="swatch" style="background:${S.colors[r.persona]}"></span><span class="name">${esc(r.persona)}</span><span class="sub">${esc(p.label || p.category || "")}</span>`;
+  if (r.error) return `<div class="card" data-id="${esc(r.persona)}" style="--c:${S.colors[r.persona]}">${head}</div><div class="err" style="margin-top:6px">${esc(r.error.replace(/^\w+: /, ""))}</div></div>`;
+  const d = r.length - r.base_length;
+  const floors = r.levels.filter(l => l !== 0);
+  let h = `<div class="card" data-id="${esc(r.persona)}" style="--c:${S.colors[r.persona]}">${head}<span class="len">${fmt(r.length)}</span><span class="delta">${d >= 0.5 ? "+" + fmt(d) : d <= -0.5 ? "−" + fmt(-d) : "same"}</span></div>`;
+  if (floors.length) h += `<div class="hint" style="margin-top:4px">Uses floor${floors.length > 1 ? "s" : ""} ${floors.join(", ")} (dashed on the map)</div>`;
+  for (const s of r.stats) {
+    const tot = s.ok_m + s.bad_m + s.unknown_m || 1;
+    const tag = s.hard ? `<span class="tag hard">must</span>` : `<span class="tag">imp ${s.importance} · flex ${s.flexibility}</span>`;
+    let cmp = `unmet ${fmt(s.bad_m)}` + (s.unknown_m ? ` · no data ${fmt(s.unknown_m)}` : "");
+    if (s.base) {
+      const diff = s.bad_m - s.base.bad_m;
+      const cls = diff < -1 ? "better" : diff > 1 ? "worse" : "";
+      cmp += ` <span class="${cls}">(shortest: ${fmt(s.base.bad_m)})</span>`;
+    }
+    if (s.pruned) cmp += ` · ${s.pruned} segments excluded`;
+    h += `<div class="req"><div class="rl"><span title="${esc(s.describe)}">${esc(s.label || s.describe)}</span>${tag}</div>
+          <div class="bar"><i class="ok" style="width:${100 * s.ok_m / tot}%"></i><i class="bad" style="width:${100 * s.bad_m / tot}%"></i><i class="unk" style="width:${100 * s.unknown_m / tot}%"></i></div>
+          <div class="cmp">${cmp}</div></div>`;
+  }
+  for (const w of r.waypoints) h += `<div class="via">↳ via <code>${esc(w)}</code></div>`;
+  for (const n of r.notes) h += `<div class="note">${esc(n)}</div>`;
+  return h + `</div>`;
+}
+
+// ---------------------------------------------------------------- personas tab
+function reqTag(q) {
+  if (q.kind === "ignored") return `<span class="tag ign" title="${esc(q.ignored_reason)}">ignored</span>`;
+  if (q.kind === "waypoint") return `<span class="tag wp">go via</span>`;
+  return q.hard ? `<span class="tag hard">must</span>` : `<span class="tag">imp ${q.importance} · flex ${q.flexibility}</span>`;
+}
+function renderPersonaCards() {
+  $("#pcards").innerHTML = S.personas.map(p => `
+    <div class="card" data-pid="${esc(p.id)}">
+      <div class="top" style="cursor:default"><span class="swatch" style="background:${S.colors[p.id]}"></span><span class="name">${esc(p.id)}</span>
+        <span class="sub">${esc([p.label, p.category].filter(Boolean).join(" · "))}</span><span class="tag">${esc(p.source)}</span></div>
+      ${p.requirements.map(q => `<div class="req"><div class="rl"><span>${esc(q.label || "(no label)")}</span>${reqTag(q)}</div>
+        <div class="cmp" style="font-family:var(--mono)">${esc(q.describe)}</div>${q.kind === "ignored" ? `<div class="note" style="margin-top:0">${esc(q.ignored_reason)}</div>` : ""}</div>`).join("")}
+      ${p.notes.map(n => `<div class="note">${esc(n)}</div>`).join("")}
+      <div class="row" style="gap:6px;margin-top:10px">
+        ${p.editable ? `<button class="btn small" data-act="edit">Edit</button>` : ""}
+        <button class="btn small" data-act="dup">Duplicate</button>
+        ${p.editable ? `<button class="btn small danger" data-act="del">Delete</button>` : `<span class="hint">shipped in ABox.ttl (read-only)</span>`}
+      </div>
+    </div>`).join("");
+  $("#pcards").querySelectorAll("button[data-act]").forEach(b => b.onclick = async () => {
+    const id = b.closest(".card").dataset.pid, act = b.dataset.act;
+    if (act === "del") {
+      if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = "Click again to delete"; setTimeout(() => { delete b.dataset.armed; b.textContent = "Delete"; }, 3000); return; }
+      try { await api("/api/delete?id=" + encodeURIComponent(id), {}); toast(`Deleted ${id}`); await loadPersonas(); } catch (e) { toast(e.message); }
+      return;
+    }
+    const { yaml } = await api("/api/persona_yaml?id=" + encodeURIComponent(id));
+    if (act === "edit") openEditor(yaml, id);
+    else openEditor(yaml.replace(/^id: .*$/m, `id: ${id}Copy`), null);
+  });
+}
+let editing = null;
+function openEditor(text, replaceId) {
+  editing = replaceId; $("#yaml").value = text; $("#edMsgs").innerHTML = ""; $("#edHint").textContent = "";
+  $("#edTitle").textContent = replaceId ? `Edit ${replaceId}` : "New persona";
+  $("#plist").hidden = true; $("#editor").hidden = false; $("#yaml").focus();
+}
+$("#edCancel").onclick = () => { $("#editor").hidden = true; $("#plist").hidden = false; };
+$("#newP").onclick = () => {
+  const t = S.templates.find(x => x.name === $("#tpl").value);
+  openEditor(t ? t.yaml.replace(/^id: .*$/m, "id: Me") : "id: Me\nlabel: \ncategory: preference\nrequirements:\n  - label: \n    importance: 0.5\n    flexibility: 0.5\n    condition: {property: D_STAIRS, op: EQUALS, value: false}\n", null);
+};
+$("#yaml").addEventListener("keydown", e => {
+  if (e.key === "Tab") { e.preventDefault(); const t = e.target, s = t.selectionStart; t.setRangeText("  ", s, t.selectionEnd, "end"); }
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); $("#edSave").click(); }
+});
+function showMsgs(r) {
+  $("#edMsgs").innerHTML = r.errors.map(e => `<div class="err">✕ ${esc(e)}</div>`).join("")
+    + r.warnings.map(w => `<div class="note" style="margin:3px 0">⚠ ${esc(w)}</div>`).join("")
+    + (r.ok && !r.errors.length ? `<div style="color:var(--ok)">✓ Valid${r.warnings.length ? " (with warnings)" : ""}</div>` : "");
+}
+$("#edCheck").onclick = async () => { try { showMsgs(await api("/api/check", { yaml: $("#yaml").value, replace: editing })); } catch (e) { toast(e.message); } };
+$("#edSave").onclick = async () => {
+  try {
+    const r = await api("/api/save", { yaml: $("#yaml").value, replace: editing });
+    showMsgs(r);
+    if (r.ok) {
+      toast(`Saved ${r.id} → ${r.path}`);
+      S.selected.add(r.id); if (editing && editing !== r.id) S.selected.delete(editing); store.set("selected", [...S.selected]);
+      await loadPersonas(); editing = r.id; $("#edTitle").textContent = `Edit ${r.id}`;
+    }
+  } catch (e) { toast(e.message); }
+};
+
+async function loadPersonas() {
+  S.personas = await api("/api/personas");
+  S.personas.forEach((p, i) => S.colors[p.id] = PALETTE[i % PALETTE.length]);
+  if (!store.get("selected", null)) S.selected = new Set(S.personas.map(p => p.id));
+  S.selected = new Set([...S.selected].filter(id => S.colors[id]));
+  renderChips(); renderPersonaCards();
+}
+
+// ---------------------------------------------------------------- properties tab
+async function renderProps() {
+  if (!S.props) S.props = await api("/api/properties");
+  const q = $("#pq").value.trim().toLowerCase(), withData = $("#pwith").checked;
+  const rows = S.props.filter(p => (!withData || p.count) && (!q || p.key.toLowerCase().includes(q) || (p.derived || "").toLowerCase().includes(q) || p.top.some(([v]) => v.toLowerCase().includes(q))));
+  $("#plistProps").innerHTML = `<div class="hint">${rows.length} of ${S.props.length}</div>` + rows.slice(0, 300).map(p => `
+    <div class="prow"><div class="row" style="justify-content:space-between"><b data-k="${esc(p.key)}">${esc(p.key)}</b><span class="hint">${p.count.toLocaleString("en")}</span></div>
+      ${p.derived ? `<div class="hint">derived: ${esc(p.derived)}</div>` : ""}
+      ${p.top.length ? `<div class="vals">${p.top.map(([v, c]) => `<span title="${c}">${esc(v)}</span>`).join("")}</div>` : ""}</div>`).join("");
+  $("#plistProps").querySelectorAll("b[data-k]").forEach(b => b.onclick = () => { navigator.clipboard?.writeText(b.dataset.k); toast(`Copied ${b.dataset.k}`); });
+}
+$("#pq").oninput = renderProps; $("#pwith").onchange = renderProps;
+
+// ---------------------------------------------------------------- tabs
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + b.dataset.view));
+  if (b.dataset.view === "props") renderProps();
+  store.set("tab", b.dataset.view);
+});
+
+// ---------------------------------------------------------------- boot
+(async () => {
+  try {
+    const [meta, base, templates] = await Promise.all([api("/api/meta"), api("/api/basemap"), api("/api/templates")]);
+    S.meta = meta; S.templates = templates;
+    $("#tpl").innerHTML += templates.map(t => `<option value="${esc(t.name)}">from ${esc(t.name)}.yaml</option>`).join("");
+    const style = { building: { fillColor: "#ddd6ca", color: "#cbc3b4", weight: .6, fillOpacity: 1 },
+                    green: { fillColor: "#cfe5c3", color: "#cfe5c3", weight: 0, fillOpacity: 1 },
+                    path: { color: "#b9b2a6", weight: 1.2, opacity: 1 } };
+    kgBase = L.geoJSON(base, { pane: "base", interactive: false, style: f => style[f.properties.k] });
+    const b = L.latLngBounds(meta.bounds);
+    map.fitBounds(b.pad(0.05));
+    setMode(store.get("mode", "auto"));
+    if (store.get("bg", "kg") === "osm") osm.addTo(map); else kgBase.addTo(map);
+    new BgCtl().addTo(map);
+    if (store.get("bg", "kg") === "osm") document.querySelector('.mapctl input[value=osm]').checked = true;
+    L.control.scale({ imperial: false }).addTo(map);
+
+    const D = meta.defaults;
+    bindRange("#lam", "#lamV", "lam", D.lam); bindRange("#unk", "#unkV", "unk", D.unknown_penalty);
+    if (meta.time_range) {
+      const [t0, t1] = meta.time_range;
+      $("#time").value = store.get("time", "2026-06-05T14:00");
+      $("#useTime").checked = store.get("useTime", false); $("#time").disabled = !$("#useTime").checked;
+      $("#useTime").parentElement.insertAdjacentHTML("afterend", `<div class="hint" style="margin:-2px 0 6px">Campus data covers ${t0.slice(0, 10)} … ${t1.slice(0, 10)}. Elsewhere any date works; unticked means now.</div>`);
+    } else { $("#useTime").disabled = true; }
+    setPoint("A", store.get("ptA", D.from)); setPoint("B", store.get("ptB", D.to));
+    await loadPersonas();
+    const tab = store.get("tab", "route"); document.querySelector(`nav button[data-view=${tab}]`)?.click();
+    $("#loading").remove();
+  } catch (e) {
+    $("#loading").innerHTML = `<div class="err">Could not reach the server: ${esc(e.message)}<br>Start it with <code>python server.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>

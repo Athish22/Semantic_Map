@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6f6a62"/>
+    </marker>
+    <style>
+      .t  { font-size: 14px; font-weight: 700; fill: #1f1d1a; }
+      .f  { font-size: 11.5px; font-family: Consolas, Menlo, monospace; fill: #2f6fdf; }
+      .d  { font-size: 12px; fill: #4a463f; }
+      .h  { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; fill: #8a8378; }
+      .a  { stroke: #6f6a62; stroke-width: 1.6; fill: none; marker-end: url(#arr); }
+      .src  { fill: #f3efe6; stroke: #d8d0c0; }
+      .load { fill: #e8f0fc; stroke: #b9cdef; }
+      .eng  { fill: #fdeee4; stroke: #efc6a8; }
+      .ui   { fill: #e7f3e8; stroke: #b5d6b9; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="600" fill="#ffffff"/>
+  <text x="500" y="32" text-anchor="middle" font-size="19" font-weight="700" fill="#1f1d1a">PIIRRITE personalised routing: how it fits together</text>
+
+  <!-- column headings -->
+  <text x="135" y="66" text-anchor="middle" class="h">DATA SOURCES</text>
+  <text x="490" y="66" text-anchor="middle" class="h">piirrite_route/  (Python package)</text>
+  <text x="860" y="66" text-anchor="middle" class="h">INTERFACES</text>
+  <rect x="290" y="76" width="400" height="388" rx="12" fill="none" stroke="#c9c3b8" stroke-dasharray="5 5"/>
+
+  <!-- sources -->
+  <rect class="src" x="20" y="80" width="230" height="104" rx="10"/>
+  <text x="34" y="103" class="t">PIIRRITE knowledge graph</text>
+  <text x="34" y="121" class="f">data/TBox.ttl GoT.ttl ABox.ttl</text>
+  <text x="34" y="140" class="d">ontology, property vocabulary,</text>
+  <text x="34" y="156" class="d">La Doua campus (paths, POIs, floors,</text>
+  <text x="34" y="172" class="d">weather, pollen) + 6 personas</text>
+
+  <rect class="src" x="20" y="200" width="230" height="74" rx="10"/>
+  <text x="34" y="223" class="t">Your personas</text>
+  <text x="34" y="241" class="f">personas/new/*.yaml</text>
+  <text x="34" y="261" class="d">validated → personas/*.ttl</text>
+
+  <rect class="src" x="20" y="300" width="230" height="74" rx="10"/>
+  <text x="34" y="323" class="t">OpenStreetMap</text>
+  <text x="34" y="342" class="d">Overpass: footpaths, places, trees</text>
+  <text x="34" y="360" class="d">Nominatim: place search</text>
+
+  <rect class="src" x="20" y="390" width="230" height="64" rx="10"/>
+  <text x="34" y="413" class="t">Open-Meteo</text>
+  <text x="34" y="433" class="d">hourly weather + pollen, anywhere</text>
+
+  <!-- loaders -->
+  <rect class="load" x="305" y="90" width="170" height="100" rx="10"/>
+  <text x="319" y="113" class="t">Campus network</text>
+  <text x="319" y="131" class="f">kg.py  network.py</text>
+  <text x="319" y="150" class="d">features + walkable</text>
+  <text x="319" y="166" class="d">graph over floors −1…5,</text>
+  <text x="319" y="182" class="d">+ derived stairs, slope…</text>
+
+  <rect class="load" x="305" y="206" width="170" height="80" rx="10"/>
+  <text x="319" y="229" class="t">Personas</text>
+  <text x="319" y="247" class="f">personas.py</text>
+  <text x="319" y="266" class="d">requirements: importance,</text>
+  <text x="319" y="281" class="d">flexibility, condition tree</text>
+
+  <rect class="load" x="305" y="302" width="170" height="104" rx="10"/>
+  <text x="319" y="325" class="t">OSM network</text>
+  <text x="319" y="343" class="f">osm.py</text>
+  <text x="319" y="362" class="d">same graph format; OSM</text>
+  <text x="319" y="378" class="d">tag = PIIRRITE property</text>
+  <text x="319" y="394" class="d">+ area-wide weather</text>
+
+  <text x="305" y="430" class="d" font-style="italic">Auto: campus graph if A and B are</text>
+  <text x="305" y="446" class="d" font-style="italic">within 75 m of it, else OpenStreetMap</text>
+
+  <!-- engine -->
+  <rect class="eng" x="505" y="90" width="172" height="104" rx="10"/>
+  <text x="519" y="113" class="t">Inadequacy</text>
+  <text x="519" y="131" class="f">cost.py</text>
+  <text x="519" y="150" class="d">0…1 per requirement per</text>
+  <text x="519" y="166" class="d">edge; AND=max, OR=min,</text>
+  <text x="519" y="182" class="d">NOT=1−x, distance factors</text>
+
+  <rect class="eng" x="505" y="214" width="172" height="192" rx="10"/>
+  <text x="519" y="237" class="t">Router</text>
+  <text x="519" y="255" class="f">route.py</text>
+  <text x="519" y="276" class="d">edge weight =</text>
+  <text x="519" y="293" class="f" fill="#1f1d1a">len·(1+λ·Σ imp·inad)</text>
+  <text x="519" y="314" class="d">must-have → remove edge</text>
+  <text x="519" y="331" class="d">"go via X" → waypoints</text>
+  <text x="519" y="348" class="d">Dijkstra (NetworkX)</text>
+  <text x="519" y="365" class="d">explain: metres met /</text>
+  <text x="519" y="381" class="d">unmet / no data vs the</text>
+  <text x="519" y="397" class="d">plain shortest path</text>
+
+  <!-- interfaces -->
+  <rect class="ui" x="740" y="90" width="240" height="90" rx="10"/>
+  <text x="754" y="113" class="t">Command line</text>
+  <text x="754" y="131" class="f">cli.py</text>
+  <text x="754" y="150" class="d">personas / properties / route /</text>
+  <text x="754" y="166" class="d">compare → out/*.html, *.png</text>
+
+  <rect class="ui" x="740" y="214" width="240" height="82" rx="10"/>
+  <text x="754" y="237" class="t">Local web server</text>
+  <text x="754" y="255" class="f">server.py  :8765</text>
+  <text x="754" y="274" class="d">JSON API, picks the network,</text>
+  <text x="754" y="289" class="d">caches downloaded areas</text>
+
+  <rect class="ui" x="740" y="324" width="240" height="98" rx="10"/>
+  <text x="754" y="347" class="t">Browser UI</text>
+  <text x="754" y="365" class="f">web/index.html (Leaflet)</text>
+  <text x="754" y="384" class="d">pick A/B or search a place,</text>
+  <text x="754" y="400" class="d">compare persona routes,</text>
+  <text x="754" y="416" class="d">edit personas, browse properties</text>
+
+  <!-- arrows: sources → loaders -->
+  <path class="a" d="M250,130 H303"/>
+  <path class="a" d="M250,170 C278,170 278,232 303,232"/>
+  <path class="a" d="M250,240 H303"/>
+  <path class="a" d="M250,337 H303"/>
+  <path class="a" d="M250,420 C280,420 280,392 303,392"/>
+  <!-- loaders → engine -->
+  <path class="a" d="M475,140 C492,140 486,250 503,250"/>
+  <path class="a" d="M475,246 C490,246 488,140 503,140"/>
+  <path class="a" d="M475,262 C490,262 488,300 503,300"/>
+  <path class="a" d="M475,354 C490,354 488,360 503,360"/>
+  <path class="a" d="M591,194 V212"/>
+  <!-- engine → interfaces -->
+  <path class="a" d="M677,280 C712,280 705,135 738,135"/>
+  <path class="a" d="M677,300 C705,300 710,255 738,255"/>
+  <path class="a" d="M860,298 V322" marker-start="url(#arr)"/>
+
+  <!-- footer -->
+  <rect x="20" y="520" width="960" height="62" rx="10" fill="#faf8f3" stroke="#e4dfd5"/>
+  <text x="36" y="544" class="d"><tspan font-weight="700" fill="#1f1d1a">One request:</tspan> A, B, personas, time  →  pick network (campus / OSM)  →  for each persona: score every edge  →  prune must-haves</text>
+  <text x="36" y="565" class="d">→  insert go-via stops  →  shortest weighted path  →  compare with the plain shortest path  →  draw routes + per-requirement bars</text>
+</svg>

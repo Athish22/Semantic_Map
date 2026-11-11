@@ -1,0 +1,580 @@
+@prefix : <http://piirrite.univ-lyon1.fr/ontology/core#> .
+@prefix sf: <http://www.opengis.net/ont/sf#> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/2.1/schema/qudt#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix vann: <http://purl.org/vocab/vann/> .
+@prefix saref: <https://saref.etsi.org/core/v4.1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix piirrite: <http://piirrite.univ-lyon1.fr/ontology/core#> .
+@base <http://piirrite.univ-lyon1.fr/ontology/core#> .
+
+<http://piirrite.univ-lyon1.fr/ontology/core#> rdf:type owl:Ontology ;
+                                                owl:versionIRI <http://piirrite.univ-lyon1.fr/ontology/core/1.0.0> ;
+                                                owl:imports qudt: ,
+                                                            <http://schemas.opengis.net/geosparql/1.0/geosparql_vocab_all.rdf> ,
+                                                            skos: ,
+                                                            saref: ;
+                                                dcterms:created "2026-07-20"^^xsd:date ;
+                                                dcterms:creator "Laboratoire d'InfoRmatique en Image et Systèmes d'information" ;
+                                                dcterms:description "PIIRRITE (Pedestrian InclusIve indooR-outdooR ITinerariEs) is an ontology for inclusive pedestrian navigation. It relies on GeoSPARQL, SAREF, OWL-Time, SKOS, etc. It is developed using the SAMOD methodology through successive modelets driven by a set of competency questions reflecting user requirements."@en ,
+                                                                    "PIIRRITE (Pedestrion InclusIve indooR-outdooR ITinerariEs) est une ontologie pour la navigation piétonne inclusive. Elle repose sur GeoSPARQL, SAREF, OWL-TIME, SKOS, etc. Elle est développée en utilisant la méthodologie SAMOD à travers des modelets successifs dirigés par un ensembe de questions de compétences qui reflètent des exigences utilisateurs."@fr ;
+                                                dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+                                                dcterms:title "Ontologie PIIRRITE Core"@fr ,
+                                                              "PIIRRITE Core Ontology"@en ;
+                                                vann:preferredNamespacePrefix "piirrite" ;
+                                                vann:preferredNamespaceUri "http://piirrite.univ-lyon1.fr/ontology/core#" ;
+                                                owl:versionInfo "1.0.0" .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasAllowedValue
+piirrite:hasAllowedValue rdf:type owl:ObjectProperty ;
+                         rdfs:domain saref:Property ;
+                         rdfs:range skos:Concept ;
+                         rdfs:comment "Lie une propriété saref à la description d'une valeur qu'elle peut prendre."@fr ,
+                                      "Links a saref property to the description of a value it can have."@en ;
+                         rdfs:label "a pour valeur autorisée"@fr ,
+                                    "has allowed value"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasCondition
+piirrite:hasCondition rdf:type owl:ObjectProperty ;
+                      rdfs:domain piirrite:Requirement ;
+                      rdfs:range piirrite:Condition ;
+                      rdfs:comment "Lie une exigence à une condition."@fr ,
+                                   "Links a requirement to a condition."@en ;
+                      rdfs:label "a pour condition de validité"@fr ,
+                                 "has condition"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasDistanceFactor
+piirrite:hasDistanceFactor rdf:type owl:ObjectProperty ;
+                           rdfs:domain piirrite:AtomicCondition ;
+                           rdfs:range piirrite:DistanceFactor ;
+                           rdfs:comment "Lie une condition atomique à un facteur de distance."@fr ,
+                                        "Links an atomic conditon to a distance factor."@en ;
+                           rdfs:label "a pour facteur de distance"@fr ,
+                                      "has distance factor"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasFlexibility
+piirrite:hasFlexibility rdf:type owl:ObjectProperty ;
+                        rdfs:domain piirrite:Requirement ;
+                        rdfs:range piirrite:Flexibility ;
+                        rdfs:comment "Lie une exigence à un réel entre 0 et 1 représentant le niveau de flexibilité que doit fournir le matching avec les propriétés contextuelles de l'environnement."@fr ,
+                                     "Links a requirement to a float between 0 and 1 representing the level of flexibility needed for the matching with contextual environmental properties."@en ;
+                        rdfs:label "a pour flexibilité"@fr ,
+                                   "has flexibility"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasImportance
+piirrite:hasImportance rdf:type owl:ObjectProperty ;
+                       rdfs:domain piirrite:Requirement ;
+                       rdfs:range piirrite:Importance ;
+                       rdfs:comment "Lie une exigence à son importance."@fr ,
+                                    "Links a requirement to its importance"@en ;
+                       rdfs:label "a pour importance"@fr ,
+                                  "has importance"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasOperand
+piirrite:hasOperand rdf:type owl:ObjectProperty ;
+                    rdfs:domain piirrite:ComposedCondition ;
+                    rdfs:range piirrite:Condition ;
+                    rdfs:comment "Lie une condition composée à l'un de ses opérandes."@fr ,
+                                 "Links a composed condition to one of its operands."@en ;
+                    rdfs:label "a pour opérande"@fr ,
+                               "has operand"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasRequirement
+piirrite:hasRequirement rdf:type owl:ObjectProperty ;
+                        rdfs:domain piirrite:UserProfile ;
+                        rdfs:range piirrite:Requirement ;
+                        rdfs:comment "Lie un profil utilisateur à une exigence."@fr ,
+                                     "Links a user profile to a requirement."@en ;
+                        rdfs:label "a pour exigence"@fr ,
+                                   "has requirement"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasTargetProperty
+piirrite:hasTargetProperty rdf:type owl:ObjectProperty ;
+                           rdfs:domain piirrite:AtomicCondition ;
+                           rdfs:range saref:Property ;
+                           rdfs:comment "Lie une condition à la propriété contextuelle à laquelle elle se rapporte."@fr ,
+                                        "Links a condition to the contextual property to which it relates."@en ;
+                           rdfs:label "a pour propriété cible"@fr ,
+                                      "has target property"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasTemporalValidity
+piirrite:hasTemporalValidity rdf:type owl:ObjectProperty ;
+                             rdfs:domain saref:PropertyValue ;
+                             rdfs:range time:Interval ;
+                             rdfs:comment "Lie une valeur de propriété saref à sa fenêtre de validité temporelle, i.e. l'interval temporel pendant lequel la valeur est considérée valide. En l'absence de fenêtre de validité temporelle, celle-ci est considérée éternelle."@fr ,
+                                          "Links a saref property value to its temporal validity window, i.e. the temporal interval during which the value is considered valid. If the temporal validity window isn't specified, it is considered eternal."@en ;
+                             rdfs:label "a pour fenêtre de validité temporelle"@fr ,
+                                        "has temporal validity window"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#passesBy
+piirrite:passesBy rdf:type owl:ObjectProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( piirrite:DistanceFactor
+                                              piirrite:NavigablePath
+                                            )
+                              ] ;
+                  rdfs:range piirrite:PointOfInterest ;
+                  rdfs:comment "Lie un chemin navigable à un point d'intérêt par lequel il passe"@fr ,
+                               "Links a navigable path to a point of interest it passes by"@en ;
+                  rdfs:label "passe par"@fr ,
+                             "passes by"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#usesOperator
+piirrite:usesOperator rdf:type owl:ObjectProperty ;
+                      rdfs:domain [ rdf:type owl:Class ;
+                                    owl:unionOf ( piirrite:Condition
+                                                  piirrite:DistanceFactor
+                                                )
+                                  ] ;
+                      rdfs:range piirrite:Operator ;
+                      rdfs:comment "Lie une condition à l'opérateur qui doit être employé lors du matching avec les propriétés contextulles de l'environnement."@fr ,
+                                   "Links a condition to the operator to use for the matching with contextual environmental properties."@en ;
+                      rdfs:label "uses operator"@en ,
+                                 "utilise l'opérateur"@fr .
+
+
+###  https://saref.etsi.org/core/v4.1.1/hasPropertyValue
+saref:hasPropertyValue rdf:type owl:ObjectProperty .
+
+
+###  http://www.opengis.net/ont/geosparql#hasGeometry
+geo:hasGeometry rdf:type owl:ObjectProperty .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasDistanceType
+piirrite:hasDistanceType rdf:type owl:DatatypeProperty ;
+                         rdfs:domain piirrite:DistanceFactor ;
+                         rdfs:range xsd:string ;
+                         rdfs:comment "Lie un facteur de distance à la façon dont elle est calculée, e.g. à vol d'oiseau, en suivant les chemins humains, en utilisant la propriété 'passe par'."@fr ,
+                                      "Links a distance factor to the way it is computed, e.g. from bird flight, by following humain pathways, by using the 'passes by' property."@en ;
+                         rdfs:label "a pour type de distance"@fr ,
+                                    "has distance type"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasRequiredValue
+piirrite:hasRequiredValue rdf:type owl:DatatypeProperty ;
+                          rdfs:domain [ rdf:type owl:Class ;
+                                        owl:unionOf ( piirrite:AtomicCondition
+                                                      piirrite:DistanceFactor
+                                                    )
+                                      ] ;
+                          rdfs:range xsd:anySimpleType ;
+                          rdfs:comment "Lie une condition à une valeur considérée comme valide."@fr ,
+                                       "Links a condition to a value that is considered valid."@en ;
+                          rdfs:label "a pour valeur exigée"@fr ,
+                                     "has required value"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#hasValue
+piirrite:hasValue rdf:type owl:DatatypeProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( piirrite:Flexibility
+                                              piirrite:Importance
+                                            )
+                              ] ;
+                  rdfs:comment "Lie une enveloppe de valeur à sa valeur."@fr ,
+                               "Links a value wrapper to its value."@en ;
+                  rdfs:label "a pour valeur"@fr ,
+                             "has value"@en .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#AreaOfInterest
+piirrite:AreaOfInterest rdf:type owl:Class ;
+                        rdfs:subClassOf geo:Feature ,
+                                        saref:FeatureOfInterest ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty saref:hasPropertyValue ;
+                                          owl:someValuesFrom saref:PropertyValue
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty geo:hasGeometry ;
+                                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                          owl:onClass sf:Polygon
+                                        ] ;
+                        owl:disjointWith piirrite:PointOfInterest ,
+                                         piirrite:PolylineOfInterest ;
+                        rdfs:comment "A 2D area over a geographic space represented as a polygon and contextualised by properties which are inherited by all context-faring entities contained within the area"@en ,
+                                     "Une région 2D d'un espace géographique représentée par un polygon et contextualisée par des propriétés qui sont hérités par toutes les entitées porteuses de contexte contenues dans la région"@fr ;
+                        rdfs:label "Area of Interest"@en ,
+                                   "Région d'intérêt"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#AtomicCondition
+piirrite:AtomicCondition rdf:type owl:Class ;
+                         rdfs:subClassOf piirrite:Condition ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty piirrite:hasTargetProperty ;
+                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onClass saref:Property
+                                         ] ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty piirrite:usesOperator ;
+                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onClass piirrite:ComparisonOperator
+                                         ] ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty piirrite:hasDistanceFactor ;
+                                           owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onClass piirrite:DistanceFactor
+                                         ] ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty piirrite:hasRequiredValue ;
+                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onDataRange xsd:anySimpleType
+                                         ] ;
+                         owl:disjointWith piirrite:ComposedCondition ;
+                         rdfs:comment "A condition that a spatial element should meet in order to be considered valid from the corresponding property standpoint."@en ,
+                                      "Une condition qu'un élément spatial doit respecter pour être considéré valide du point de vue de la propriété correspondante."@fr ;
+                         rdfs:label "Atomic condition"@en ,
+                                    "Condition atomique"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#ComparisonOperator
+piirrite:ComparisonOperator rdf:type owl:Class ;
+                            owl:equivalentClass [ rdf:type owl:Class ;
+                                                  owl:oneOf ( piirrite:EQUALS
+                                                              piirrite:GREATER_THAN
+                                                              piirrite:LESSER_THAN
+                                                            )
+                                                ] ;
+                            rdfs:subClassOf piirrite:Operator ;
+                            rdfs:comment "An operator usable for the matching between a validity condition and the value of a contextual property. e.g. equality, membership, difference, superiority, etc."@en ,
+                                         "Un opérateur utilisable lors du matching entre une condition de validité et une valeur de propriété contextuelle. e.g. égalité, appartenance, différence, supériorité, etc."@fr ;
+                            rdfs:label "Comparison operator"@en ,
+                                       "Opérateur de comparaison"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#ComposedCondition
+piirrite:ComposedCondition rdf:type owl:Class ;
+                           rdfs:subClassOf piirrite:Condition ,
+                                           [ rdf:type owl:Restriction ;
+                                             owl:onProperty piirrite:hasOperand ;
+                                             owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                             owl:onClass piirrite:Condition
+                                           ] ,
+                                           [ rdf:type owl:Restriction ;
+                                             owl:onProperty piirrite:usesOperator ;
+                                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                             owl:onClass piirrite:LogicalOperator
+                                           ] ,
+                                           [ rdf:type owl:Restriction ;
+                                             owl:onProperty piirrite:hasOperand ;
+                                             owl:maxQualifiedCardinality "2"^^xsd:nonNegativeInteger ;
+                                             owl:onClass piirrite:Condition
+                                           ] ;
+                           rdfs:comment "A condition composed of a logical operator and one or two operands that are themselves conditions."@en ,
+                                        "Une condition composée d'un opérateur logique et d'un ou deux opérande étant eux-mêmes des conditions."@fr ;
+                           rdfs:label "Composed condition"@en ,
+                                      "Condition composée"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#Condition
+piirrite:Condition rdf:type owl:Class ;
+                   owl:equivalentClass [ rdf:type owl:Class ;
+                                         owl:unionOf ( piirrite:AtomicCondition
+                                                       piirrite:ComposedCondition
+                                                     )
+                                       ] ;
+                   rdfs:comment "A condition that a spatial element should meet in order to be considered valid."@en ,
+                                "Une condition qu'un élément spatial doit respecter pour être considéré valide."@fr ;
+                   rdfs:label "Condition"@en ,
+                              "Condition"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#DistanceFactor
+piirrite:DistanceFactor rdf:type owl:Class ;
+                        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                          owl:onProperty piirrite:passesBy ;
+                                          owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                          owl:onClass piirrite:PointOfInterest
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty piirrite:usesOperator ;
+                                          owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                          owl:onClass piirrite:ComparisonOperator
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty piirrite:hasDistanceType ;
+                                          owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                          owl:onDataRange xsd:string
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty piirrite:hasRequiredValue ;
+                                          owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                          owl:onDataRange xsd:anySimpleType
+                                        ] ;
+                        rdfs:comment "A distance factor for the corresponding condition to be considered respected."@en ,
+                                     "Un facteur de distance pour que la condition correspondante soit considérée respectée."@fr ;
+                        rdfs:label "Distance factor"@en ,
+                                   "Facteur de distance"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#Flexibility
+piirrite:Flexibility rdf:type owl:Class ;
+                     rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                       owl:onProperty piirrite:hasValue ;
+                                       owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                       owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                                         owl:onDatatype xsd:double ;
+                                                         owl:withRestrictions ( [ xsd:minInclusive 0.0
+                                                                                ]
+                                                                                [ xsd:maxInclusive 1.0
+                                                                                ]
+                                                                              )
+                                                       ]
+                                     ] ;
+                     rdfs:comment "A value wrapper representing the flexilibty of a requirement using a float between 0 and 1."@en ,
+                                  "Une enveloppe de valeur décrivant la flexibilité d'une exigence par un réel entre 0 et 1."@fr ;
+                     rdfs:label "Flexibility"@en ,
+                                "Flexibilité"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#Importance
+piirrite:Importance rdf:type owl:Class ;
+                    rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                      owl:onProperty piirrite:hasValue ;
+                                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                      owl:onDataRange [ rdf:type rdfs:Datatype ;
+                                                        owl:onDatatype xsd:double ;
+                                                        owl:withRestrictions ( [ xsd:minInclusive 0.0
+                                                                               ]
+                                                                               [ xsd:maxInclusive 1.0
+                                                                               ]
+                                                                             )
+                                                      ]
+                                    ] ;
+                    rdfs:comment "A value wrapper representing the importance of a requirement using a float between 0 and 1. The importance can also be equal to INF if the requirement is mandatory."@en ,
+                                 "Une enveloppe de valeur décrivant l'importance d'une exigence par un réel entre 0 et 1. L'importance peut également valoir INF si le besoin doit obligatoirement être respecté lors de la génération d'itinéraires."@fr ;
+                    rdfs:label "Importance"@en ,
+                               "Importance"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#LogicalOperator
+piirrite:LogicalOperator rdf:type owl:Class ;
+                         owl:equivalentClass [ rdf:type owl:Class ;
+                                               owl:oneOf ( piirrite:AND
+                                                           piirrite:NOT
+                                                           piirrite:OR
+                                                         )
+                                             ] ;
+                         rdfs:subClassOf piirrite:Operator ;
+                         rdfs:comment "An operator usable for combining conditions into a composed validity expression."@en ,
+                                      "Un opérateur utilisable pour combiner des conditions en une expression de validité composée."@fr ;
+                         rdfs:label "Logical operator"@en ,
+                                    "Opérateur logique"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#NavigablePath
+piirrite:NavigablePath rdf:type owl:Class ;
+                       rdfs:subClassOf piirrite:PolylineOfInterest ;
+                       rdfs:comment "A polyline of interest that can be traveled through"@en ,
+                                    "Une polyligne d'intérêt dont le parcours est possible"@fr ;
+                       rdfs:label "Chemin navigable"@fr ,
+                                  "Navigable path"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#Operator
+piirrite:Operator rdf:type owl:Class ;
+                  owl:equivalentClass [ rdf:type owl:Class ;
+                                        owl:unionOf ( piirrite:ComparisonOperator
+                                                      piirrite:LogicalOperator
+                                                    )
+                                      ] ;
+                  rdfs:comment "A comparison or logical operator."@en ,
+                               "Un opérateur logique ou de comparaison."@fr ;
+                  rdfs:label "Operator"@en ,
+                             "Opérateur"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#PointOfInterest
+piirrite:PointOfInterest rdf:type owl:Class ;
+                         rdfs:subClassOf geo:Feature ,
+                                         saref:FeatureOfInterest ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty saref:hasPropertyValue ;
+                                           owl:someValuesFrom saref:PropertyValue
+                                         ] ,
+                                         [ rdf:type owl:Restriction ;
+                                           owl:onProperty geo:hasGeometry ;
+                                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                           owl:onClass sf:Point
+                                         ] ;
+                         owl:disjointWith piirrite:PolylineOfInterest ;
+                         rdfs:comment "A dimensionless entity located in a geographic space and contextualised by properties"@en ,
+                                      "Une entité sans dimension localisée dans un espace géographique et contextualisée par des propriétés"@fr ;
+                         rdfs:label "Point d'intérêt"@fr ,
+                                    "Point of Interest"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#PolylineOfInterest
+piirrite:PolylineOfInterest rdf:type owl:Class ;
+                            rdfs:subClassOf geo:Feature ,
+                                            saref:FeatureOfInterest ,
+                                            [ rdf:type owl:Restriction ;
+                                              owl:onProperty saref:hasPropertyValue ;
+                                              owl:someValuesFrom saref:PropertyValue
+                                            ] ,
+                                            [ rdf:type owl:Restriction ;
+                                              owl:onProperty geo:hasGeometry ;
+                                              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                              owl:onClass sf:LineString
+                                            ] ;
+                            rdfs:comment "A sequence of 1 or more consecutive segments located in a geographic space and contextualised by properties"@en ,
+                                         "Une séquence d'1 ou plus segments consécutifs localisée dans un espace géographique et contextualisée par des propriétés"@fr ;
+                            rdfs:label "Polyligne d'intérêt"@fr ,
+                                       "Polyline Of Interest"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#Requirement
+piirrite:Requirement rdf:type owl:Class ;
+                     rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                       owl:onProperty piirrite:hasCondition ;
+                                       owl:allValuesFrom piirrite:Condition
+                                     ] ,
+                                     [ rdf:type owl:Restriction ;
+                                       owl:onProperty piirrite:hasFlexibility ;
+                                       owl:allValuesFrom piirrite:Flexibility
+                                     ] ,
+                                     [ rdf:type owl:Restriction ;
+                                       owl:onProperty piirrite:hasImportance ;
+                                       owl:allValuesFrom piirrite:Importance
+                                     ] ,
+                                     [ rdf:type owl:Restriction ;
+                                       owl:onProperty piirrite:hasCondition ;
+                                       owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                       owl:onClass piirrite:Condition
+                                     ] ;
+                     rdfs:comment "A user requirement, represented by its importance, its rigor and one or many validity conditions"@en ,
+                                  "Une exigence d'un utilisateur, représentée par son importance, sa rigueur et une ou plusieurs conditions de validité."@fr ;
+                     rdfs:label "Exigence"@fr ,
+                                "Requirement"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#UserProfile
+piirrite:UserProfile rdf:type owl:Class ;
+                     rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                       owl:onProperty piirrite:hasRequirement ;
+                                       owl:allValuesFrom piirrite:Requirement
+                                     ] ;
+                     rdfs:comment "A user profile, described by a set of requirement (eg. 'I want to use elevators') rather than by personnal characteristics (eg. I'm in a wheelchair)."@en ,
+                                  "Le profil d'un utilisateur, décrit par un ensemble d'exigences (eg. 'Je veux prendre l'ascenseur') plutôt que par des caractéristiques personnels (eg. 'Je suis en fauteuil')."@fr ;
+                     rdfs:label "Profil utilisateur"@fr ,
+                                "User profile"@en .
+
+
+###  http://www.opengis.net/ont/geosparql#Feature
+geo:Feature rdf:type owl:Class .
+
+
+###  http://www.opengis.net/ont/sf#LineString
+sf:LineString rdf:type owl:Class .
+
+
+###  http://www.opengis.net/ont/sf#Point
+sf:Point rdf:type owl:Class .
+
+
+###  http://www.opengis.net/ont/sf#Polygon
+sf:Polygon rdf:type owl:Class .
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Class
+rdfs:Class rdf:type owl:Class .
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Datatype
+rdfs:Datatype rdf:type owl:Class .
+
+
+###  http://www.w3.org/2006/time#Interval
+time:Interval rdf:type owl:Class .
+
+
+###  https://saref.etsi.org/core/v4.1.1/FeatureOfInterest
+saref:FeatureOfInterest rdf:type owl:Class .
+
+
+###  https://saref.etsi.org/core/v4.1.1/Property
+saref:Property rdf:type owl:Class .
+
+
+###  https://saref.etsi.org/core/v4.1.1/PropertyValue
+saref:PropertyValue rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#AND
+piirrite:AND rdf:type owl:NamedIndividual ,
+                      piirrite:LogicalOperator ;
+             rdfs:label "and"@en ,
+                        "et"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#EQUALS
+piirrite:EQUALS rdf:type owl:NamedIndividual ,
+                         piirrite:ComparisonOperator ;
+                rdfs:label "equals"@en ,
+                           "égal à"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#GREATER_THAN
+piirrite:GREATER_THAN rdf:type owl:NamedIndividual ,
+                               piirrite:ComparisonOperator ;
+                      rdfs:label "greater than"@en ,
+                                 "supérieur à"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#LESSER_THAN
+piirrite:LESSER_THAN rdf:type owl:NamedIndividual ,
+                              piirrite:ComparisonOperator ;
+                     rdfs:label "inférieur à"@fr ,
+                                "less than"@en .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#NOT
+piirrite:NOT rdf:type owl:NamedIndividual ,
+                      piirrite:LogicalOperator ;
+             rdfs:label "not"@en ,
+                        "pas"@fr .
+
+
+###  http://piirrite.univ-lyon1.fr/ontology/core#OR
+piirrite:OR rdf:type owl:NamedIndividual ,
+                     piirrite:LogicalOperator ;
+            rdfs:label "or"@en ,
+                       "ou"@fr .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

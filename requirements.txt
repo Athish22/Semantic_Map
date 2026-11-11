@@ -1,0 +1,6 @@
+folium==0.20.0
+networkx==3.7
+pytest==9.2.0
+PyYAML==6.0.3
+rdflib==7.6.0
+shapely==2.2.0

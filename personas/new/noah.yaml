@@ -1,0 +1,29 @@
+# Sensory: low-vision pedestrian.
+id: Noah
+label: Low-vision pedestrian
+category: sensory
+requirements:
+  - label: Well-lit paths
+    importance: 0.9
+    flexibility: 0.3
+    condition: {property: P_Lit, op: EQUALS, value: "yes"}
+
+  - label: Tactile paving where possible
+    importance: 0.5
+    flexibility: 0.6
+    condition: {property: P_TactilePaving, op: EQUALS, value: "yes"}
+
+  - label: Keep away from tram tracks
+    importance: 0.7
+    flexibility: 0.4
+    condition:
+      NOT:
+        property: D_TRAM
+        op: EQUALS
+        value: "yes"
+        distance: {op: LESSER_THAN, metres: 30}
+
+  - label: Prefer step-free
+    importance: 0.4
+    flexibility: 0.6
+    condition: {property: D_STAIRS, op: EQUALS, value: false}

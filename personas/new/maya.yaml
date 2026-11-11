@@ -1,0 +1,19 @@
+# Preference: runner who wants green, outdoor routes and does not mind stairs.
+id: Maya
+label: Runner, likes green routes
+category: preference
+requirements:
+  - label: Close to trees
+    importance: 0.7
+    flexibility: 0.5
+    condition: {property: P_Natural, op: EQUALS, value: [tree, tree_row], distance: {op: LESSER_THAN, metres: 15}}
+
+  - label: Outdoors
+    importance: 0.6
+    flexibility: 0.5
+    condition: {property: D_INDOOR, op: EQUALS, value: false}
+
+  - label: Decent surface
+    importance: 0.3
+    flexibility: 0.7
+    condition: {property: P_Smoothness, op: EQUALS, value: intermediate}
